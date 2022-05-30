@@ -26,8 +26,16 @@ exports.getTour = catchAsync(async (req, res) => {
   //build template
 
   //render template using data from step 1
-  res.status(200).render("tour", {
-    title: `${tour.name} Tour`,
-    tour,
-  });
+  res
+    .status(200)
+    .set({
+      "Cross-Origin-Resource-Policy": "cross-site",
+
+      "Content-Security-Policy":
+        "script-src 'self' https://cdnjs.cloudflare.com https://api.mapbox.com",
+    })
+    .render("tour", {
+      title: `${tour.name} Tour`,
+      tour,
+    });
 });
