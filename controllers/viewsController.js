@@ -32,10 +32,23 @@ exports.getTour = catchAsync(async (req, res) => {
       "Cross-Origin-Resource-Policy": "cross-site",
 
       "Content-Security-Policy":
-        "script-src 'self' https://cdnjs.cloudflare.com https://api.mapbox.com",
+        "default-src 'self' https://*.mapbox.com ;base-uri 'self';block-all-mixed-content;font-src 'self' https: data:;frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src https://cdnjs.cloudflare.com https://api.mapbox.com 'self' blob: ;script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests;",
+      "Cross-Origin-Embedder-Policy": "unsafe-none",
     })
     .render("tour", {
       title: `${tour.name} Tour`,
       tour,
+    });
+});
+
+exports.getLoginForm = catchAsync(async (req, res) => {
+  res
+    .status(200)
+    .set(
+      "Content-Security-Policy",
+      "connect-src 'self' https://cdnjs.cloudflare.com http://127.0.0.1:3000/"
+    )
+    .render("login", {
+      title: "Log into your account",
     });
 });

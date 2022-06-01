@@ -64,9 +64,7 @@ reviewSchema.statics.calcAverageRatings = async function (tourId) {
 };
 
 reviewSchema.post("save", function (next) {
-  //we use this.constructor because it refers to the current model, we can't use Review because it still hasn't been declared and filled; we can't use PRE as the current review still isn't saved and can't give us data
   this.constructor.calcAverageRatings(this.tour);
-  next();
 });
 
 reviewSchema.pre(/^findOneAnd/, async function (next) {

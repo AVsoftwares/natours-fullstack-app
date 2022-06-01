@@ -7,7 +7,7 @@ const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const hpp = require("hpp");
 const morgan = require("morgan");
-
+const cookieParser = require("cookie-parser");
 const AppError = require("./utils/AppError");
 const globalErrorhandler = require("./controllers/errorController");
 const tourRouter = require("./routes/tourRoutes");
@@ -25,7 +25,46 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
 
 //set security http headers
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: false,
+    hsts: false,
+  })
+);
+const scriptSrcUrls = [
+  "https://api.tiles.mapbox.com/",
+  "https://api.mapbox.com/",
+  "https://*.cloudflare.com",
+];
+const styleSrcUrls = [
+  "https://api.mapbox.com/",
+  "https://api.tiles.mapbox.com/",
+  "https://fonts.googleapis.com/",
+  "https://www.myfonts.com/fonts/radomir-tinkov/gilroy/*",
+];
+const connectSrcUrls = [
+  "https://*.mapbox.com/",
+  "https://*.cloudflare.com",
+  "http://127.0.0.1:3000",
+];
+
+const fontSrcUrls = ["fonts.googleapis.com", "fonts.gstatic.com"];
+
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'", "http://127.0.0.1:3000/*"],
+      connectSrc: ["'self'", ...connectSrcUrls],
+      scriptSrc: ["'self'", ...scriptSrcUrls],
+      styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+      workerSrc: ["'self'", "blob:"],
+      objectSrc: [],
+      imgSrc: ["'self'", "blob:", "data:"],
+      fontSrc: ["'self'", ...fontSrcUrls],
+    },
+  })
+);
 
 //dev logging
 if (process.env.NODE_ENV === "development") {
@@ -44,6 +83,7 @@ app.use("/api", limiter);
 
 //body parser, from body into req.body
 app.use(express.json({ limit: "10 kb" }));
+app.use(cookieParser());
 
 //data sanitization against noSQL query injection
 //looks at request properties and filters out dollar signs etc. to prevent query injections
@@ -67,8 +107,11 @@ app.use(
   })
 );
 
+//test middleware
+
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
+  console.log(req.cookies);
   next();
 });
 
